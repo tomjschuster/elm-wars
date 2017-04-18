@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, input, text)
-import Html.Attributes exposing (type_, value)
+import Html exposing (Html, div, input, button, text, i, table, tr, td)
+import Html.Attributes exposing (class, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as JD exposing (Decoder, string, maybe, list, int)
@@ -218,12 +218,47 @@ translateButton maybePerson fromLanguage =
                         Wookiee ->
                             English
             in
-                input
-                    [ type_ "button"
-                    , toString toLanguage |> String.append "Translate To " |> value
+                button
+                    [ class "ui black button"
                     , TranslatePerson toLanguage |> onClick
                     ]
-                    []
+                    [ toString toLanguage |> String.append "Translate To " |> text ]
+
+        Nothing ->
+            text ""
+
+
+personCard : Maybe Person -> Html Msg
+personCard maybePerson =
+    case maybePerson of
+        Just person ->
+            div
+                [ class "ui card" ]
+                [ div
+                    [ class "content" ]
+                    [ div
+                        [ class "header" ]
+                        [ text person.name ]
+                    , div
+                        [ class "meta" ]
+                        [ div
+                            [ class "ui description" ]
+                            [ table
+                                [ class "ui celled table" ]
+                                [ tr
+                                    []
+                                    [ td [] [ text "Name" ], td [] [ text person.name ] ]
+                                , tr
+                                    []
+                                    [ td [] [ text "Gender" ], td [] [ text person.gender ] ]
+                                , tr
+                                    []
+                                    [ td [] [ text "Planet" ], td [] [] ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
 
         Nothing ->
             text ""
@@ -232,21 +267,24 @@ translateButton maybePerson fromLanguage =
 view : Model -> Html Msg
 view model =
     div
-        []
+        [ class "ui container" ]
         [ div
-            []
-            [ input
-                [ type_ "text", onInput UpdateQuery ]
-                []
-            , input
-                [ type_ "button", value "Query", onClick QueryPerson ]
-                []
-            , translateButton model.person model.language
+            [ class "item" ]
+            [ div
+                [ class "ui action left icon input" ]
+                [ i [ class "search icon" ] []
+                , input
+                    [ type_ "text", onInput UpdateQuery ]
+                    []
+                , button
+                    [ class "ui button", onClick QueryPerson ]
+                    [ text "Query" ]
+                , translateButton model.person model.language
+                ]
             ]
-        , div
-            []
-            []
-        , model |> toString |> text
+        , div [ class "ui divider" ] []
+        , personCard model.person
+          --, model |> toString |> text
         ]
 
 

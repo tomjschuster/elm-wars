@@ -9113,6 +9113,164 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
+var _user$project$Main$personCard = function (maybePerson) {
+	var _p0 = maybePerson;
+	if (_p0.ctor === 'Just') {
+		var _p1 = _p0._0;
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('ui card'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('content'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('header'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(_p1.name),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('meta'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('ui description'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$table,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('ui celled table'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$tr,
+														{ctor: '[]'},
+														{
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$td,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: _elm_lang$html$Html$text('Name'),
+																	_1: {ctor: '[]'}
+																}),
+															_1: {
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$td,
+																	{ctor: '[]'},
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html$text(_p1.name),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {ctor: '[]'}
+															}
+														}),
+													_1: {
+														ctor: '::',
+														_0: A2(
+															_elm_lang$html$Html$tr,
+															{ctor: '[]'},
+															{
+																ctor: '::',
+																_0: A2(
+																	_elm_lang$html$Html$td,
+																	{ctor: '[]'},
+																	{
+																		ctor: '::',
+																		_0: _elm_lang$html$Html$text('Gender'),
+																		_1: {ctor: '[]'}
+																	}),
+																_1: {
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$td,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text(_p1.gender),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {ctor: '[]'}
+																}
+															}),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_elm_lang$html$Html$tr,
+																{ctor: '[]'},
+																{
+																	ctor: '::',
+																	_0: A2(
+																		_elm_lang$html$Html$td,
+																		{ctor: '[]'},
+																		{
+																			ctor: '::',
+																			_0: _elm_lang$html$Html$text('Planet'),
+																			_1: {ctor: '[]'}
+																		}),
+																	_1: {
+																		ctor: '::',
+																		_0: A2(
+																			_elm_lang$html$Html$td,
+																			{ctor: '[]'},
+																			{ctor: '[]'}),
+																		_1: {ctor: '[]'}
+																	}
+																}),
+															_1: {ctor: '[]'}
+														}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			});
+	} else {
+		return _elm_lang$html$Html$text('');
+	}
+};
 var _user$project$Main$translateFields = F3(
 	function (personInLanguage, planetInLanguage, person) {
 		return _elm_lang$core$Native_Utils.update(
@@ -9122,8 +9280,8 @@ var _user$project$Main$translateFields = F3(
 var _user$project$Main$getLanguageUrl = F2(
 	function (language, url) {
 		var format = function () {
-			var _p0 = language;
-			if (_p0.ctor === 'English') {
+			var _p2 = language;
+			if (_p2.ctor === 'English') {
 				return '';
 			} else {
 				return 'wookiee';
@@ -9134,9 +9292,9 @@ var _user$project$Main$getLanguageUrl = F2(
 			url,
 			A2(_elm_lang$core$Basics_ops['++'], '?format=', format));
 	});
-var _user$project$Main$getFirstPerson = function (_p1) {
-	var _p2 = _p1;
-	return _elm_lang$core$List$head(_p2.people);
+var _user$project$Main$getFirstPerson = function (_p3) {
+	var _p4 = _p3;
+	return _elm_lang$core$List$head(_p4.people);
 };
 var _user$project$Main$Model = F3(
 	function (a, b, c) {
@@ -9154,8 +9312,8 @@ var _user$project$Main$Planet = function (a) {
 	return {climate: a};
 };
 var _user$project$Main$planetDecoder = function (language) {
-	var _p3 = language;
-	if (_p3.ctor === 'English') {
+	var _p5 = language;
+	if (_p5.ctor === 'English') {
 		return A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 			'climate',
@@ -9171,15 +9329,15 @@ var _user$project$Main$planetDecoder = function (language) {
 };
 var _user$project$Main$getPlanet = F2(
 	function (language, maybePerson) {
-		var _p4 = maybePerson;
-		if (_p4.ctor === 'Just') {
-			var _p5 = _p4._0;
+		var _p6 = maybePerson;
+		if (_p6.ctor === 'Just') {
+			var _p7 = _p6._0;
 			return A2(
 				_elm_lang$core$Task$map,
 				function (x) {
 					return _elm_lang$core$Maybe$Just(
 						_elm_lang$core$Native_Utils.update(
-							_p5,
+							_p7,
 							{
 								planet: _elm_lang$core$Maybe$Just(x)
 							}));
@@ -9187,7 +9345,7 @@ var _user$project$Main$getPlanet = F2(
 				_elm_lang$http$Http$toTask(
 					A2(
 						_elm_lang$http$Http$get,
-						A2(_user$project$Main$getLanguageUrl, language, _p5.planetUrl),
+						A2(_user$project$Main$getLanguageUrl, language, _p7.planetUrl),
 						_user$project$Main$planetDecoder(language))));
 		} else {
 			return _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
@@ -9201,8 +9359,8 @@ var _user$project$Main$init = {
 	_1: _elm_lang$core$Platform_Cmd$none
 };
 var _user$project$Main$personDecoder = function (language) {
-	var _p6 = language;
-	if (_p6.ctor === 'English') {
+	var _p8 = language;
+	if (_p8.ctor === 'English') {
 		return A4(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
 			'planet',
@@ -9280,37 +9438,37 @@ var _user$project$Main$TranslatePerson = function (a) {
 };
 var _user$project$Main$translateButton = F2(
 	function (maybePerson, fromLanguage) {
-		var _p7 = maybePerson;
-		if (_p7.ctor === 'Just') {
+		var _p9 = maybePerson;
+		if (_p9.ctor === 'Just') {
 			var toLanguage = function () {
-				var _p8 = fromLanguage;
-				if (_p8.ctor === 'English') {
+				var _p10 = fromLanguage;
+				if (_p10.ctor === 'English') {
 					return _user$project$Main$Wookiee;
 				} else {
 					return _user$project$Main$English;
 				}
 			}();
 			return A2(
-				_elm_lang$html$Html$input,
+				_elm_lang$html$Html$button,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$type_('button'),
+					_0: _elm_lang$html$Html_Attributes$class('ui black button'),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$value(
-							A2(
-								_elm_lang$core$String$append,
-								'Translate To ',
-								_elm_lang$core$Basics$toString(toLanguage))),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Main$TranslatePerson(toLanguage)),
-							_1: {ctor: '[]'}
-						}
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Main$TranslatePerson(toLanguage)),
+						_1: {ctor: '[]'}
 					}
 				},
-				{ctor: '[]'});
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						A2(
+							_elm_lang$core$String$append,
+							'Translate To ',
+							_elm_lang$core$Basics$toString(toLanguage))),
+					_1: {ctor: '[]'}
+				});
 		} else {
 			return _elm_lang$html$Html$text('');
 		}
@@ -9332,14 +9490,14 @@ var _user$project$Main$queryPerson = function (name) {
 };
 var _user$project$Main$getPersonInLanguage = F2(
 	function (language, maybePerson) {
-		var _p9 = maybePerson;
-		if (_p9.ctor === 'Just') {
-			var _p11 = _p9._0;
+		var _p11 = maybePerson;
+		if (_p11.ctor === 'Just') {
+			var _p13 = _p11._0;
 			var personPlanetInLanguageTask = A2(
 				_elm_lang$core$Task$map,
 				function (x) {
 					return _elm_lang$core$Native_Utils.update(
-						_p11,
+						_p13,
 						{
 							planet: _elm_lang$core$Maybe$Just(x)
 						});
@@ -9347,9 +9505,9 @@ var _user$project$Main$getPersonInLanguage = F2(
 				_elm_lang$http$Http$toTask(
 					A2(
 						_elm_lang$http$Http$get,
-						A2(_user$project$Main$getLanguageUrl, language, _p11.planetUrl),
+						A2(_user$project$Main$getLanguageUrl, language, _p13.planetUrl),
 						_user$project$Main$planetDecoder(language))));
-			var languageUrl = A2(_user$project$Main$getLanguageUrl, language, _p11.url);
+			var languageUrl = A2(_user$project$Main$getLanguageUrl, language, _p13.url);
 			var personInLanguageTask = _elm_lang$http$Http$toTask(
 				A2(
 					_elm_lang$http$Http$get,
@@ -9361,10 +9519,10 @@ var _user$project$Main$getPersonInLanguage = F2(
 				A2(
 					_elm_lang$core$Task$map,
 					function (tasks) {
-						var _p10 = tasks;
-						if (((_p10.ctor === '::') && (_p10._1.ctor === '::')) && (_p10._1._1.ctor === '[]')) {
+						var _p12 = tasks;
+						if (((_p12.ctor === '::') && (_p12._1.ctor === '::')) && (_p12._1._1.ctor === '[]')) {
 							return _elm_lang$core$Maybe$Just(
-								A3(_user$project$Main$translateFields, _p10._0, _p10._1._0.planet, _p11));
+								A3(_user$project$Main$translateFields, _p12._0, _p12._1._0.planet, _p13));
 						} else {
 							return _elm_lang$core$Maybe$Nothing;
 						}
@@ -9388,14 +9546,14 @@ var _user$project$Main$getPersonInLanguage = F2(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p12 = msg;
-		switch (_p12.ctor) {
+		var _p14 = msg;
+		switch (_p14.ctor) {
 			case 'UpdateQuery':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{query: _p12._0}),
+						{query: _p14._0}),
 					{ctor: '[]'});
 			case 'QueryPerson':
 				return _elm_lang$core$Native_Utils.eq(model.query, '') ? {
@@ -9410,12 +9568,12 @@ var _user$project$Main$update = F2(
 					_1: _user$project$Main$queryPerson(model.query)
 				};
 			case 'GetPerson':
-				if (_p12._0.ctor === 'Ok') {
+				if (_p14._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{person: _p12._0._0}),
+							{person: _p14._0._0}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -9425,13 +9583,13 @@ var _user$project$Main$update = F2(
 						{ctor: '[]'});
 				}
 			default:
-				var _p13 = _p12._0;
+				var _p15 = _p14._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{language: _p13}),
-					_1: A2(_user$project$Main$getPersonInLanguage, _p13, model.person)
+						{language: _p15}),
+					_1: A2(_user$project$Main$getPersonInLanguage, _p15, model.person)
 				};
 		}
 	});
@@ -9442,61 +9600,94 @@ var _user$project$Main$UpdateQuery = function (a) {
 var _user$project$Main$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
-		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('ui container'),
+			_1: {ctor: '[]'}
+		},
 		{
 			ctor: '::',
 			_0: A2(
 				_elm_lang$html$Html$div,
-				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('item'),
+					_1: {ctor: '[]'}
+				},
 				{
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$input,
+						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$type_('text'),
+							_0: _elm_lang$html$Html_Attributes$class('ui action left icon input'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$i,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('search icon'),
+									_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$UpdateQuery),
-								_1: {ctor: '[]'}
-							}
-						},
-						{ctor: '[]'}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$input,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$type_('button'),
+								_0: A2(
+									_elm_lang$html$Html$input,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$type_('text'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$UpdateQuery),
+											_1: {ctor: '[]'}
+										}
+									},
+									{ctor: '[]'}),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$value('Query'),
+									_0: A2(
+										_elm_lang$html$Html$button,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('ui button'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryPerson),
+												_1: {ctor: '[]'}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Query'),
+											_1: {ctor: '[]'}
+										}),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryPerson),
+										_0: A2(_user$project$Main$translateButton, model.person, model.language),
 										_1: {ctor: '[]'}
 									}
 								}
-							},
-							{ctor: '[]'}),
-						_1: {
-							ctor: '::',
-							_0: A2(_user$project$Main$translateButton, model.person, model.language),
-							_1: {ctor: '[]'}
-						}
-					}
+							}
+						}),
+					_1: {ctor: '[]'}
 				}),
 			_1: {
 				ctor: '::',
 				_0: A2(
 					_elm_lang$html$Html$div,
-					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('ui divider'),
+						_1: {ctor: '[]'}
+					},
 					{ctor: '[]'}),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(model)),
+					_0: _user$project$Main$personCard(model.person),
 					_1: {ctor: '[]'}
 				}
 			}
@@ -9506,7 +9697,7 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$Main$init,
 		update: _user$project$Main$update,
-		subscriptions: function (_p14) {
+		subscriptions: function (_p16) {
 			return _elm_lang$core$Platform_Sub$none;
 		},
 		view: _user$project$Main$view
