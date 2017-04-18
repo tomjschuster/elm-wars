@@ -30,13 +30,17 @@ type alias Person =
     { url : String
     , name : String
     , gender : String
+    , mass : String
+    , height : String
+    , birthYear : String
     , planetUrl : String
     , planet : Maybe Planet
     }
 
 
 type alias Planet =
-    { climate : String
+    { name : String
+    , climate : String
     }
 
 
@@ -89,6 +93,9 @@ personDecoder language =
                 |> required "url" string
                 |> required "name" string
                 |> required "gender" string
+                |> required "mass" string
+                |> required "height" string
+                |> required "birth_year" string
                 |> required "homeworld" string
                 |> optional "planet" (maybe (planetDecoder English)) Nothing
 
@@ -97,6 +104,9 @@ personDecoder language =
                 |> required "hurcan" string
                 |> required "whrascwo" string
                 |> required "rrwowhwaworc" string
+                |> required "scracc" string
+                |> required "acwoahrracao" string
+                |> required "rhahrcaoac_roworarc" string
                 |> required "acooscwoohoorcanwa" string
                 |> optional "planet" (maybe (planetDecoder Wookiee)) Nothing
 
@@ -106,10 +116,12 @@ planetDecoder language =
     case language of
         English ->
             decode Planet
+                |> required "name" string
                 |> required "climate" string
 
         Wookiee ->
             decode Planet
+                |> required "hurcan" string
                 |> required "oaanahscraaowo" string
 
 
@@ -237,7 +249,7 @@ personCard maybePerson =
                 [ div
                     [ class "content" ]
                     [ div
-                        [ class "header" ]
+                        [ class "ui dividing header" ]
                         [ text person.name ]
                     , div
                         [ class "meta" ]
@@ -253,7 +265,16 @@ personCard maybePerson =
                                     [ td [] [ text "Gender" ], td [] [ text person.gender ] ]
                                 , tr
                                     []
-                                    [ td [] [ text "Planet" ], td [] [] ]
+                                    [ td [] [ text "Mass" ], td [] [ person.mass ++ " kg" |> text ] ]
+                                , tr
+                                    []
+                                    [ td [] [ text "Height" ], td [] [ person.height ++ " cm" |> text ] ]
+                                , tr
+                                    []
+                                    [ td [] [ text "Birth Year" ], td [] [ text person.birthYear ] ]
+                                , tr
+                                    []
+                                    [ td [] [ text "Planet" ], td [] [ planetText person.planet |> text ] ]
                                 ]
                             ]
                         ]
@@ -262,6 +283,16 @@ personCard maybePerson =
 
         Nothing ->
             text ""
+
+
+planetText : Maybe Planet -> String
+planetText maybePlanet =
+    case maybePlanet of
+        Just planet ->
+            String.concat [ planet.name, " (", planet.climate, ")" ]
+
+        Nothing ->
+            ""
 
 
 view : Model -> Html Msg
