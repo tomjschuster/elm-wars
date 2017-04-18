@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, input, button, text, i, table, tr, td)
+import Html exposing (Html, div, input, button, text, i, table, tr, td, h1)
 import Html.Attributes exposing (class, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -10,19 +10,22 @@ import Task
 
 
 type alias Model =
-    { query : String, person : Maybe Person, language : Language }
+    { query : String
+    , results : List Person
+    , person : Maybe Person
+    , language : Language
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" Nothing English
+    ( Model "" [] Nothing English
     , Cmd.none
     )
 
 
 type alias QueryResult =
-    { count : Int
-    , people : List Person
+    { people : List Person
     }
 
 
@@ -52,6 +55,8 @@ type Language
 type Msg
     = UpdateQuery String
     | QueryPerson
+    | FetchPerson Person
+    | GetResults (Result Http.Error (List Person))
     | GetPerson (Result Http.Error (Maybe Person))
     | TranslatePerson Language
 
@@ -66,7 +71,13 @@ update msg model =
             if model.query == "" then
                 ( { model | person = Nothing }, Cmd.none )
             else
-                ( model, queryPerson model.query )
+                ( model, getQueryResults model.query )
+
+        GetResults (Ok results) ->
+            ( { model | results = results }, Cmd.none )
+
+        GetResults (Err _) ->
+            ( { model | person = Nothing, results = [] }, Cmd.none )
 
         GetPerson (Ok person) ->
             ( { model | person = person }, Cmd.none )
@@ -74,14 +85,21 @@ update msg model =
         GetPerson (Err _) ->
             model ! []
 
+        FetchPerson person ->
+            ( model, getPerson model.language person )
+
         TranslatePerson language ->
-            ( { model | language = language }, getPersonInLanguage language model.person )
+            case model.person of
+                Just person ->
+                    ( { model | language = language }, getPerson language person )
+
+                Nothing ->
+                    model ! []
 
 
 queryResultDecoder : Language -> Decoder QueryResult
 queryResultDecoder language =
     decode QueryResult
-        |> required "count" int
         |> required "results" (list (personDecoder language))
 
 
@@ -121,77 +139,55 @@ planetDecoder language =
 
         Wookiee ->
             decode Planet
-                |> required "hurcan" string
+                |> required "whrascwo" string
                 |> required "oaanahscraaowo" string
 
 
-getQueryResult : String -> Task.Task Http.Error QueryResult
-getQueryResult name =
+getQueryResults : String -> Cmd Msg
+getQueryResults name =
     let
         url =
             getLanguageUrl English "http://swapi.co/api/people/" ++ "&search=" ++ name
     in
         Http.get url (queryResultDecoder English)
             |> Http.toTask
+            |> Task.map (\{ people } -> people)
+            |> Task.attempt GetResults
 
 
-getFirstPerson : QueryResult -> Maybe Person
-getFirstPerson { people } =
-    List.head people
+getPlanet : Language -> Person -> Task.Task Http.Error Person
+getPlanet language person =
+    Http.get (getLanguageUrl language person.planetUrl) (planetDecoder language)
+        |> Http.toTask
+        |> Task.map (\x -> ({ person | planet = (Just x) }))
 
 
-getPlanet : Language -> Maybe Person -> Task.Task Http.Error (Maybe Person)
-getPlanet language maybePerson =
-    case maybePerson of
-        Just person ->
+getPerson : Language -> Person -> Cmd Msg
+getPerson language person =
+    let
+        languageUrl =
+            getLanguageUrl language person.url
+
+        personInLanguageTask =
+            Http.get languageUrl (personDecoder language)
+                |> Http.toTask
+
+        personPlanetInLanguageTask =
             Http.get (getLanguageUrl language person.planetUrl) (planetDecoder language)
                 |> Http.toTask
-                |> Task.map (\x -> Just ({ person | planet = (Just x) }))
+                |> Task.map (\x -> { person | planet = Just x })
+    in
+        Task.sequence [ personInLanguageTask, personPlanetInLanguageTask ]
+            |> Task.map
+                (\tasks ->
+                    case tasks of
+                        [ personInLanguage, { planet } ] ->
+                            Just (translateFields personInLanguage planet person)
 
-        Nothing ->
-            Task.succeed Nothing
-
-
-queryPerson : String -> Cmd Msg
-queryPerson name =
-    getQueryResult name
-        |> Task.map getFirstPerson
-        |> Task.andThen (getPlanet English)
-        |> Task.attempt GetPerson
-
-
-getPersonInLanguage : Language -> Maybe Person -> Cmd Msg
-getPersonInLanguage language maybePerson =
-    case maybePerson of
-        Just person ->
-            let
-                languageUrl =
-                    getLanguageUrl language person.url
-
-                personInLanguageTask =
-                    Http.get languageUrl (personDecoder language)
-                        |> Http.toTask
-
-                personPlanetInLanguageTask =
-                    Http.get (getLanguageUrl language person.planetUrl) (planetDecoder language)
-                        |> Http.toTask
-                        |> Task.map (\x -> { person | planet = Just x })
-            in
-                Task.sequence [ personInLanguageTask, personPlanetInLanguageTask ]
-                    |> Task.map
-                        (\tasks ->
-                            case tasks of
-                                [ personInLanguage, { planet } ] ->
-                                    Just (translateFields personInLanguage planet person)
-
-                                _ ->
-                                    Nothing
-                        )
-                    |> Task.attempt GetPerson
-
-        Nothing ->
-            Task.succeed Nothing
-                |> Task.attempt GetPerson
+                        _ ->
+                            Nothing
+                )
+            |> Task.attempt GetPerson
 
 
 getLanguageUrl : Language -> String -> String
@@ -285,6 +281,23 @@ personCard maybePerson =
             text ""
 
 
+resultsRow : Person -> Html Msg
+resultsRow person =
+    button [ class "ui button attached", FetchPerson person |> onClick ] [ text person.name ]
+
+
+resultsList : List Person -> Html Msg
+resultsList people =
+    if List.length people == 0 then
+        text ""
+    else
+        div
+            [ class "ui card" ]
+            ((div [ class "content" ] [ div [ class "header" ] [ text "Results" ] ])
+                :: List.map resultsRow people
+            )
+
+
 planetText : Maybe Planet -> String
 planetText maybePlanet =
     case maybePlanet of
@@ -301,7 +314,8 @@ view model =
         [ class "ui container" ]
         [ div
             [ class "item" ]
-            [ div
+            [ h1 [ class "ui dividing header" ] [ text "ElmWars" ]
+            , div
                 [ class "ui action left icon input" ]
                 [ i [ class "search icon" ] []
                 , input
@@ -314,7 +328,11 @@ view model =
                 ]
             ]
         , div [ class "ui divider" ] []
-        , personCard model.person
+        , div [ class "ui two cards" ]
+            [ resultsList model.results
+            , personCard model.person
+            ]
+          --, div [ class "ui divider" ] []
           --, model |> toString |> text
         ]
 

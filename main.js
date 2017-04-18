@@ -9412,18 +9412,13 @@ var _user$project$Main$getLanguageUrl = F2(
 			url,
 			A2(_elm_lang$core$Basics_ops['++'], '?format=', format));
 	});
-var _user$project$Main$getFirstPerson = function (_p5) {
-	var _p6 = _p5;
-	return _elm_lang$core$List$head(_p6.people);
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {query: a, results: b, person: c, language: d};
+	});
+var _user$project$Main$QueryResult = function (a) {
+	return {people: a};
 };
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {query: a, person: b, language: c};
-	});
-var _user$project$Main$QueryResult = F2(
-	function (a, b) {
-		return {count: a, people: b};
-	});
 var _user$project$Main$Person = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {url: a, name: b, gender: c, mass: d, height: e, birthYear: f, planetUrl: g, planet: h};
@@ -9433,8 +9428,8 @@ var _user$project$Main$Planet = F2(
 		return {name: a, climate: b};
 	});
 var _user$project$Main$planetDecoder = function (language) {
-	var _p7 = language;
-	if (_p7.ctor === 'English') {
+	var _p5 = language;
+	if (_p5.ctor === 'English') {
 		return A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 			'climate',
@@ -9451,45 +9446,43 @@ var _user$project$Main$planetDecoder = function (language) {
 			_elm_lang$core$Json_Decode$string,
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'hurcan',
+				'whrascwo',
 				_elm_lang$core$Json_Decode$string,
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Main$Planet)));
 	}
 };
 var _user$project$Main$getPlanet = F2(
-	function (language, maybePerson) {
-		var _p8 = maybePerson;
-		if (_p8.ctor === 'Just') {
-			var _p9 = _p8._0;
-			return A2(
-				_elm_lang$core$Task$map,
-				function (x) {
-					return _elm_lang$core$Maybe$Just(
-						_elm_lang$core$Native_Utils.update(
-							_p9,
-							{
-								planet: _elm_lang$core$Maybe$Just(x)
-							}));
-				},
-				_elm_lang$http$Http$toTask(
-					A2(
-						_elm_lang$http$Http$get,
-						A2(_user$project$Main$getLanguageUrl, language, _p9.planetUrl),
-						_user$project$Main$planetDecoder(language))));
-		} else {
-			return _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
-		}
+	function (language, person) {
+		return A2(
+			_elm_lang$core$Task$map,
+			function (x) {
+				return _elm_lang$core$Native_Utils.update(
+					person,
+					{
+						planet: _elm_lang$core$Maybe$Just(x)
+					});
+			},
+			_elm_lang$http$Http$toTask(
+				A2(
+					_elm_lang$http$Http$get,
+					A2(_user$project$Main$getLanguageUrl, language, person.planetUrl),
+					_user$project$Main$planetDecoder(language))));
 	});
 var _user$project$Main$Wookiee = {ctor: 'Wookiee'};
 var _user$project$Main$English = {ctor: 'English'};
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: A3(_user$project$Main$Model, '', _elm_lang$core$Maybe$Nothing, _user$project$Main$English),
+	_0: A4(
+		_user$project$Main$Model,
+		'',
+		{ctor: '[]'},
+		_elm_lang$core$Maybe$Nothing,
+		_user$project$Main$English),
 	_1: _elm_lang$core$Platform_Cmd$none
 };
 var _user$project$Main$personDecoder = function (language) {
-	var _p10 = language;
-	if (_p10.ctor === 'English') {
+	var _p6 = language;
+	if (_p6.ctor === 'English') {
 		return A4(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
 			'planet',
@@ -9569,33 +9562,18 @@ var _user$project$Main$queryResultDecoder = function (language) {
 		'results',
 		_elm_lang$core$Json_Decode$list(
 			_user$project$Main$personDecoder(language)),
-		A3(
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'count',
-			_elm_lang$core$Json_Decode$int,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Main$QueryResult)));
-};
-var _user$project$Main$getQueryResult = function (name) {
-	var url = A2(
-		_elm_lang$core$Basics_ops['++'],
-		A2(_user$project$Main$getLanguageUrl, _user$project$Main$English, 'http://swapi.co/api/people/'),
-		A2(_elm_lang$core$Basics_ops['++'], '&search=', name));
-	return _elm_lang$http$Http$toTask(
-		A2(
-			_elm_lang$http$Http$get,
-			url,
-			_user$project$Main$queryResultDecoder(_user$project$Main$English)));
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Main$QueryResult));
 };
 var _user$project$Main$TranslatePerson = function (a) {
 	return {ctor: 'TranslatePerson', _0: a};
 };
 var _user$project$Main$translateButton = F2(
 	function (maybePerson, fromLanguage) {
-		var _p11 = maybePerson;
-		if (_p11.ctor === 'Just') {
+		var _p7 = maybePerson;
+		if (_p7.ctor === 'Just') {
 			var toLanguage = function () {
-				var _p12 = fromLanguage;
-				if (_p12.ctor === 'English') {
+				var _p8 = fromLanguage;
+				if (_p8.ctor === 'English') {
 					return _user$project$Main$Wookiee;
 				} else {
 					return _user$project$Main$English;
@@ -9629,84 +9607,86 @@ var _user$project$Main$translateButton = F2(
 var _user$project$Main$GetPerson = function (a) {
 	return {ctor: 'GetPerson', _0: a};
 };
-var _user$project$Main$queryPerson = function (name) {
-	return A2(
-		_elm_lang$core$Task$attempt,
-		_user$project$Main$GetPerson,
-		A2(
-			_elm_lang$core$Task$andThen,
-			_user$project$Main$getPlanet(_user$project$Main$English),
-			A2(
-				_elm_lang$core$Task$map,
-				_user$project$Main$getFirstPerson,
-				_user$project$Main$getQueryResult(name))));
-};
-var _user$project$Main$getPersonInLanguage = F2(
-	function (language, maybePerson) {
-		var _p13 = maybePerson;
-		if (_p13.ctor === 'Just') {
-			var _p15 = _p13._0;
-			var personPlanetInLanguageTask = A2(
-				_elm_lang$core$Task$map,
-				function (x) {
-					return _elm_lang$core$Native_Utils.update(
-						_p15,
-						{
-							planet: _elm_lang$core$Maybe$Just(x)
-						});
-				},
-				_elm_lang$http$Http$toTask(
-					A2(
-						_elm_lang$http$Http$get,
-						A2(_user$project$Main$getLanguageUrl, language, _p15.planetUrl),
-						_user$project$Main$planetDecoder(language))));
-			var languageUrl = A2(_user$project$Main$getLanguageUrl, language, _p15.url);
-			var personInLanguageTask = _elm_lang$http$Http$toTask(
+var _user$project$Main$getPerson = F2(
+	function (language, person) {
+		var personPlanetInLanguageTask = A2(
+			_elm_lang$core$Task$map,
+			function (x) {
+				return _elm_lang$core$Native_Utils.update(
+					person,
+					{
+						planet: _elm_lang$core$Maybe$Just(x)
+					});
+			},
+			_elm_lang$http$Http$toTask(
 				A2(
 					_elm_lang$http$Http$get,
-					languageUrl,
-					_user$project$Main$personDecoder(language)));
-			return A2(
-				_elm_lang$core$Task$attempt,
-				_user$project$Main$GetPerson,
-				A2(
-					_elm_lang$core$Task$map,
-					function (tasks) {
-						var _p14 = tasks;
-						if (((_p14.ctor === '::') && (_p14._1.ctor === '::')) && (_p14._1._1.ctor === '[]')) {
-							return _elm_lang$core$Maybe$Just(
-								A3(_user$project$Main$translateFields, _p14._0, _p14._1._0.planet, _p15));
-						} else {
-							return _elm_lang$core$Maybe$Nothing;
-						}
-					},
-					_elm_lang$core$Task$sequence(
-						{
+					A2(_user$project$Main$getLanguageUrl, language, person.planetUrl),
+					_user$project$Main$planetDecoder(language))));
+		var languageUrl = A2(_user$project$Main$getLanguageUrl, language, person.url);
+		var personInLanguageTask = _elm_lang$http$Http$toTask(
+			A2(
+				_elm_lang$http$Http$get,
+				languageUrl,
+				_user$project$Main$personDecoder(language)));
+		return A2(
+			_elm_lang$core$Task$attempt,
+			_user$project$Main$GetPerson,
+			A2(
+				_elm_lang$core$Task$map,
+				function (tasks) {
+					var _p9 = tasks;
+					if (((_p9.ctor === '::') && (_p9._1.ctor === '::')) && (_p9._1._1.ctor === '[]')) {
+						return _elm_lang$core$Maybe$Just(
+							A3(_user$project$Main$translateFields, _p9._0, _p9._1._0.planet, person));
+					} else {
+						return _elm_lang$core$Maybe$Nothing;
+					}
+				},
+				_elm_lang$core$Task$sequence(
+					{
+						ctor: '::',
+						_0: personInLanguageTask,
+						_1: {
 							ctor: '::',
-							_0: personInLanguageTask,
-							_1: {
-								ctor: '::',
-								_0: personPlanetInLanguageTask,
-								_1: {ctor: '[]'}
-							}
-						})));
-		} else {
-			return A2(
-				_elm_lang$core$Task$attempt,
-				_user$project$Main$GetPerson,
-				_elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing));
-		}
+							_0: personPlanetInLanguageTask,
+							_1: {ctor: '[]'}
+						}
+					})));
 	});
+var _user$project$Main$GetResults = function (a) {
+	return {ctor: 'GetResults', _0: a};
+};
+var _user$project$Main$getQueryResults = function (name) {
+	var url = A2(
+		_elm_lang$core$Basics_ops['++'],
+		A2(_user$project$Main$getLanguageUrl, _user$project$Main$English, 'http://swapi.co/api/people/'),
+		A2(_elm_lang$core$Basics_ops['++'], '&search=', name));
+	return A2(
+		_elm_lang$core$Task$attempt,
+		_user$project$Main$GetResults,
+		A2(
+			_elm_lang$core$Task$map,
+			function (_p10) {
+				var _p11 = _p10;
+				return _p11.people;
+			},
+			_elm_lang$http$Http$toTask(
+				A2(
+					_elm_lang$http$Http$get,
+					url,
+					_user$project$Main$queryResultDecoder(_user$project$Main$English)))));
+};
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p16 = msg;
-		switch (_p16.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'UpdateQuery':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{query: _p16._0}),
+						{query: _p12._0}),
 					{ctor: '[]'});
 			case 'QueryPerson':
 				return _elm_lang$core$Native_Utils.eq(model.query, '') ? {
@@ -9718,15 +9698,36 @@ var _user$project$Main$update = F2(
 				} : {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Main$queryPerson(model.query)
+					_1: _user$project$Main$getQueryResults(model.query)
 				};
-			case 'GetPerson':
-				if (_p16._0.ctor === 'Ok') {
+			case 'GetResults':
+				if (_p12._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{person: _p16._0._0}),
+							{results: _p12._0._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								person: _elm_lang$core$Maybe$Nothing,
+								results: {ctor: '[]'}
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'GetPerson':
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{person: _p12._0._0}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -9735,17 +9736,91 @@ var _user$project$Main$update = F2(
 						model,
 						{ctor: '[]'});
 				}
-			default:
-				var _p17 = _p16._0;
+			case 'FetchPerson':
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{language: _p17}),
-					_1: A2(_user$project$Main$getPersonInLanguage, _p17, model.person)
+					_0: model,
+					_1: A2(_user$project$Main$getPerson, model.language, _p12._0)
 				};
+			default:
+				var _p14 = _p12._0;
+				var _p13 = model.person;
+				if (_p13.ctor === 'Just') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{language: _p14}),
+						_1: A2(_user$project$Main$getPerson, _p14, _p13._0)
+					};
+				} else {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						{ctor: '[]'});
+				}
 		}
 	});
+var _user$project$Main$FetchPerson = function (a) {
+	return {ctor: 'FetchPerson', _0: a};
+};
+var _user$project$Main$resultsRow = function (person) {
+	return A2(
+		_elm_lang$html$Html$button,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('ui button attached'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(
+					_user$project$Main$FetchPerson(person)),
+				_1: {ctor: '[]'}
+			}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(person.name),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Main$resultsList = function (people) {
+	return _elm_lang$core$Native_Utils.eq(
+		_elm_lang$core$List$length(people),
+		0) ? _elm_lang$html$Html$text('') : A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('ui card'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('content'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('header'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Results'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}),
+			_1: A2(_elm_lang$core$List$map, _user$project$Main$resultsRow, people)
+		});
+};
 var _user$project$Main$QueryPerson = {ctor: 'QueryPerson'};
 var _user$project$Main$UpdateQuery = function (a) {
 	return {ctor: 'UpdateQuery', _0: a};
@@ -9770,63 +9845,78 @@ var _user$project$Main$view = function (model) {
 				{
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$h1,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('ui action left icon input'),
+							_0: _elm_lang$html$Html_Attributes$class('ui dividing header'),
 							_1: {ctor: '[]'}
 						},
 						{
 							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$i,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('search icon'),
-									_1: {ctor: '[]'}
-								},
-								{ctor: '[]'}),
-							_1: {
+							_0: _elm_lang$html$Html$text('ElmWars'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('ui action left icon input'),
+								_1: {ctor: '[]'}
+							},
+							{
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$input,
+									_elm_lang$html$Html$i,
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$type_('text'),
-										_1: {
-											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$UpdateQuery),
-											_1: {ctor: '[]'}
-										}
+										_0: _elm_lang$html$Html_Attributes$class('search icon'),
+										_1: {ctor: '[]'}
 									},
 									{ctor: '[]'}),
 								_1: {
 									ctor: '::',
 									_0: A2(
-										_elm_lang$html$Html$button,
+										_elm_lang$html$Html$input,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('ui button'),
+											_0: _elm_lang$html$Html_Attributes$type_('text'),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryPerson),
+												_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$UpdateQuery),
 												_1: {ctor: '[]'}
 											}
 										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Query'),
-											_1: {ctor: '[]'}
-										}),
+										{ctor: '[]'}),
 									_1: {
 										ctor: '::',
-										_0: A2(_user$project$Main$translateButton, model.person, model.language),
-										_1: {ctor: '[]'}
+										_0: A2(
+											_elm_lang$html$Html$button,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('ui button'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryPerson),
+													_1: {ctor: '[]'}
+												}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Query'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(_user$project$Main$translateButton, model.person, model.language),
+											_1: {ctor: '[]'}
+										}
 									}
 								}
-							}
-						}),
-					_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
 				}),
 			_1: {
 				ctor: '::',
@@ -9840,7 +9930,22 @@ var _user$project$Main$view = function (model) {
 					{ctor: '[]'}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Main$personCard(model.person),
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('ui two cards'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _user$project$Main$resultsList(model.results),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$personCard(model.person),
+								_1: {ctor: '[]'}
+							}
+						}),
 					_1: {ctor: '[]'}
 				}
 			}
@@ -9850,7 +9955,7 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 	{
 		init: _user$project$Main$init,
 		update: _user$project$Main$update,
-		subscriptions: function (_p18) {
+		subscriptions: function (_p15) {
 			return _elm_lang$core$Platform_Sub$none;
 		},
 		view: _user$project$Main$view
