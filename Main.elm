@@ -4,14 +4,15 @@ import Html exposing (Html, div, input, button, text, i, table, tr, td, h1)
 import Html.Attributes exposing (class, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode as JD exposing (Decoder, string, maybe, list, int)
+import Json.Decode as JD exposing (Decoder, maybe, list)
 import Json.Decode.Pipeline exposing (required, decode, optional)
+import UrlParser exposing ((</>), s, string, parseHash)
 import Task
 
 
 type alias Model =
     { query : String
-    , results : List Person
+    , queryResult : QueryResult
     , person : Maybe Person
     , language : Language
     }
@@ -19,13 +20,27 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [] Nothing English
+    ( Model "" (emptyQueryResult "") Nothing English
     , Cmd.none
     )
 
 
 type alias QueryResult =
     { people : List Person
+    , queryString : String
+    , count : Int
+    , next : String
+    , previous : String
+    }
+
+
+emptyQueryResult : String -> QueryResult
+emptyQueryResult queryString =
+    { people = []
+    , queryString = queryString
+    , count = 0
+    , next = ""
+    , previous = ""
     }
 
 
@@ -55,10 +70,10 @@ type Language
 type Msg
     = UpdateQuery String
     | QueryPerson
-    | FetchPerson Person
-    | GetResults (Result Http.Error (List Person))
+    | GetResults (Result Http.Error QueryResult)
+    | SelectResult Person
     | GetPerson (Result Http.Error (Maybe Person))
-    | TranslatePerson Language
+    | Translate Language
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -68,16 +83,28 @@ update msg model =
             { model | query = query } ! []
 
         QueryPerson ->
-            if model.query == "" then
-                ( { model | person = Nothing }, Cmd.none )
-            else
-                ( model, getQueryResults model.query )
+            let
+                cmd =
+                    if model.query == "" then
+                        Cmd.none
+                    else
+                        queryByName model.query
+            in
+                ( { model | person = Nothing }, cmd )
 
-        GetResults (Ok results) ->
-            ( { model | results = results }, Cmd.none )
+        GetResults (Ok queryResult) ->
+            ( { model | queryResult = queryResult }, Cmd.none )
 
         GetResults (Err _) ->
-            ( { model | person = Nothing, results = [] }, Cmd.none )
+            ( { model
+                | person = Nothing
+                , queryResult = emptyQueryResult model.query
+              }
+            , Cmd.none
+            )
+
+        SelectResult person ->
+            ( model, getPerson model.language person )
 
         GetPerson (Ok person) ->
             ( { model | person = person }, Cmd.none )
@@ -85,22 +112,27 @@ update msg model =
         GetPerson (Err _) ->
             model ! []
 
-        FetchPerson person ->
-            ( model, getPerson model.language person )
+        Translate language ->
+            let
+                cmd =
+                    case model.person of
+                        Just person ->
+                            getPerson language person
 
-        TranslatePerson language ->
-            case model.person of
-                Just person ->
-                    ( { model | language = language }, getPerson language person )
-
-                Nothing ->
-                    model ! []
+                        Nothing ->
+                            Cmd.none
+            in
+                ( { model | language = language }, cmd )
 
 
 queryResultDecoder : Language -> Decoder QueryResult
 queryResultDecoder language =
     decode QueryResult
-        |> required "results" (list (personDecoder language))
+        |> required "results" (JD.list (personDecoder language))
+        |> optional "queryString" JD.string ""
+        |> required "count" JD.int
+        |> optional "next" JD.string ""
+        |> optional "previous" JD.string ""
 
 
 personDecoder : Language -> Decoder Person
@@ -108,25 +140,25 @@ personDecoder language =
     case language of
         English ->
             decode Person
-                |> required "url" string
-                |> required "name" string
-                |> required "gender" string
-                |> required "mass" string
-                |> required "height" string
-                |> required "birth_year" string
-                |> required "homeworld" string
-                |> optional "planet" (maybe (planetDecoder English)) Nothing
+                |> required "url" JD.string
+                |> required "name" JD.string
+                |> required "gender" JD.string
+                |> required "mass" JD.string
+                |> required "height" JD.string
+                |> required "birth_year" JD.string
+                |> required "homeworld" JD.string
+                |> optional "planet" (JD.maybe (planetDecoder English)) Nothing
 
         Wookiee ->
             decode Person
-                |> required "hurcan" string
-                |> required "whrascwo" string
-                |> required "rrwowhwaworc" string
-                |> required "scracc" string
-                |> required "acwoahrracao" string
-                |> required "rhahrcaoac_roworarc" string
-                |> required "acooscwoohoorcanwa" string
-                |> optional "planet" (maybe (planetDecoder Wookiee)) Nothing
+                |> required "hurcan" JD.string
+                |> required "whrascwo" JD.string
+                |> required "rrwowhwaworc" JD.string
+                |> required "scracc" JD.string
+                |> required "acwoahrracao" JD.string
+                |> required "rhahrcaoac_roworarc" JD.string
+                |> required "acooscwoohoorcanwa" JD.string
+                |> optional "planet" (JD.maybe (planetDecoder Wookiee)) Nothing
 
 
 planetDecoder : Language -> Decoder Planet
@@ -134,25 +166,30 @@ planetDecoder language =
     case language of
         English ->
             decode Planet
-                |> required "name" string
-                |> required "climate" string
+                |> required "name" JD.string
+                |> required "climate" JD.string
 
         Wookiee ->
             decode Planet
-                |> required "whrascwo" string
-                |> required "oaanahscraaowo" string
+                |> required "whrascwo" JD.string
+                |> required "oaanahscraaowo" JD.string
+
+
+queryByName : String -> Cmd Msg
+queryByName name =
+    let
+        url =
+            "http://swapi.co/api/people/?search=" ++ name
+    in
+        getQueryResults url
 
 
 getQueryResults : String -> Cmd Msg
-getQueryResults name =
-    let
-        url =
-            getLanguageUrl English "http://swapi.co/api/people/" ++ "&search=" ++ name
-    in
-        Http.get url (queryResultDecoder English)
-            |> Http.toTask
-            |> Task.map (\{ people } -> people)
-            |> Task.attempt GetResults
+getQueryResults url =
+    Http.get url (queryResultDecoder English)
+        |> Http.toTask
+        |> Task.map (\results -> { results | queryString = "" })
+        |> Task.attempt GetResults
 
 
 getPlanet : Language -> Person -> Task.Task Http.Error Person
@@ -228,7 +265,7 @@ translateButton maybePerson fromLanguage =
             in
                 button
                     [ class "ui black button"
-                    , TranslatePerson toLanguage |> onClick
+                    , Translate toLanguage |> onClick
                     ]
                     [ toString toLanguage |> String.append "Translate To " |> text ]
 
@@ -283,18 +320,26 @@ personCard maybePerson =
 
 resultsRow : Person -> Html Msg
 resultsRow person =
-    button [ class "ui button attached", FetchPerson person |> onClick ] [ text person.name ]
+    button [ class "ui button attached", SelectResult person |> onClick ] [ text person.name ]
 
 
-resultsList : List Person -> Html Msg
-resultsList people =
-    if List.length people == 0 then
-        text ""
-    else
+resultsList : QueryResult -> Html Msg
+resultsList queryResult =
+    let
+        description =
+            if queryResult.queryString == "" then
+                ""
+            else
+                toString queryResult.count
+                    ++ " found for \""
+                    ++ queryResult.queryString
+                    ++ "\""
+    in
         div
             [ class "ui card" ]
             ((div [ class "content" ] [ div [ class "header" ] [ text "Results" ] ])
-                :: List.map resultsRow people
+                :: (div [ class "content" ] [ div [ class "description" ] [ text description ] ])
+                :: List.map resultsRow queryResult.people
             )
 
 
@@ -319,7 +364,7 @@ view model =
                 [ class "ui action left icon input" ]
                 [ i [ class "search icon" ] []
                 , input
-                    [ type_ "text", onInput UpdateQuery ]
+                    [ type_ "text", onInput UpdateQuery, value model.query ]
                     []
                 , button
                     [ class "ui button", onClick QueryPerson ]
@@ -329,11 +374,11 @@ view model =
             ]
         , div [ class "ui divider" ] []
         , div [ class "ui two cards" ]
-            [ resultsList model.results
+            [ resultsList model.queryResult
             , personCard model.person
             ]
-          --, div [ class "ui divider" ] []
-          --, model |> toString |> text
+        , div [ class "ui divider" ] []
+        , model |> toString |> text
         ]
 
 
