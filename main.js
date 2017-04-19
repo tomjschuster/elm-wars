@@ -14395,6 +14395,7 @@ var _user$project$Main$queryResultDecoder = function (language) {
 							_user$project$Main$personDecoder(language)),
 						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Main$QueryResult))))));
 };
+var _user$project$Main$ClearResults = {ctor: 'ClearResults'};
 var _user$project$Main$Translate = function (a) {
 	return {ctor: 'Translate', _0: a};
 };
@@ -14583,18 +14584,11 @@ var _user$project$Main$getQueryResults = function (url) {
 	return A2(
 		_elm_lang$core$Task$attempt,
 		_user$project$Main$GetResults,
-		A2(
-			_elm_lang$core$Task$map,
-			function (results) {
-				return _elm_lang$core$Native_Utils.update(
-					results,
-					{queryString: ''});
-			},
-			_elm_lang$http$Http$toTask(
-				A2(
-					_elm_lang$http$Http$get,
-					url,
-					_user$project$Main$queryResultDecoder(_user$project$Main$English)))));
+		_elm_lang$http$Http$toTask(
+			A2(
+				_elm_lang$http$Http$get,
+				url,
+				_user$project$Main$queryResultDecoder(_user$project$Main$English))));
 };
 var _user$project$Main$queryByName = function (name) {
 	var url = A2(_elm_lang$core$Basics_ops['++'], 'http://swapi.co/api/people/?search=', name);
@@ -14604,6 +14598,16 @@ var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p10 = msg;
 		switch (_p10.ctor) {
+			case 'ClearResults':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							person: _elm_lang$core$Maybe$Nothing,
+							queryResult: _user$project$Main$emptyQueryResult('')
+						}),
+					{ctor: '[]'});
 			case 'UpdateQuery':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -14612,13 +14616,16 @@ var _user$project$Main$update = F2(
 						{query: _p10._0}),
 					{ctor: '[]'});
 			case 'QueryPerson':
-				var cmd = _elm_lang$core$Native_Utils.eq(model.query, '') ? _elm_lang$core$Platform_Cmd$none : _user$project$Main$queryByName(model.query);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{person: _elm_lang$core$Maybe$Nothing}),
-					_1: cmd
+						{
+							query: '',
+							person: _elm_lang$core$Maybe$Nothing,
+							queryResult: _user$project$Main$emptyQueryResult(model.query)
+						}),
+					_1: _user$project$Main$queryByName(model.query)
 				};
 			case 'GetResults':
 				if (_p10._0.ctor === 'Ok') {
@@ -14626,7 +14633,11 @@ var _user$project$Main$update = F2(
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{queryResult: _p10._0._0}),
+							{
+								queryResult: _elm_lang$core$Native_Utils.update(
+									_p10._0._0,
+									{queryString: model.queryResult.queryString})
+							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -14634,10 +14645,7 @@ var _user$project$Main$update = F2(
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								person: _elm_lang$core$Maybe$Nothing,
-								queryResult: _user$project$Main$emptyQueryResult(model.query)
-							}),
+							{person: _elm_lang$core$Maybe$Nothing}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
@@ -14682,6 +14690,9 @@ var _user$project$Main$update = F2(
 		}
 	});
 var _user$project$Main$QueryPerson = {ctor: 'QueryPerson'};
+var _user$project$Main$query = function (queryString) {
+	return _elm_lang$core$Native_Utils.eq(queryString, '') ? _user$project$Main$ClearResults : _user$project$Main$QueryPerson;
+};
 var _user$project$Main$UpdateQuery = function (a) {
 	return {ctor: 'UpdateQuery', _0: a};
 };
@@ -14762,7 +14773,8 @@ var _user$project$Main$view = function (model) {
 												_0: _elm_lang$html$Html_Attributes$class('ui button'),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryPerson),
+													_0: _elm_lang$html$Html_Events$onClick(
+														_user$project$Main$query(model.query)),
 													_1: {ctor: '[]'}
 												}
 											},
@@ -14844,7 +14856,7 @@ var _user$project$Main$main = _elm_lang$html$Html$program(
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Main.Planet":{"type":"{ name : String, climate : String }","args":[]},"Main.QueryResult":{"type":"{ people : List Main.Person , queryString : String , count : Int , next : String , previous : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Main.Person":{"type":"{ url : String , name : String , gender : String , mass : String , height : String , birthYear : String , planetUrl : String , planet : Maybe.Maybe Main.Planet }","args":[]}},"unions":{"Main.Msg":{"tags":{"GetResults":["Result.Result Http.Error Main.QueryResult"],"QueryPerson":[],"UpdateQuery":["String"],"GetPerson":["Result.Result Http.Error (Maybe.Maybe Main.Person)"],"Translate":["Main.Language"],"SelectResult":["Main.Person"]},"args":[]},"Main.Language":{"tags":{"English":[],"Wookiee":[]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Main.Planet":{"type":"{ name : String, climate : String }","args":[]},"Main.QueryResult":{"type":"{ people : List Main.Person , queryString : String , count : Int , next : String , previous : String }","args":[]},"Http.Response":{"type":"{ url : String , status : { code : Int, message : String } , headers : Dict.Dict String String , body : body }","args":["body"]},"Main.Person":{"type":"{ url : String , name : String , gender : String , mass : String , height : String , birthYear : String , planetUrl : String , planet : Maybe.Maybe Main.Planet }","args":[]}},"unions":{"Main.Msg":{"tags":{"GetResults":["Result.Result Http.Error Main.QueryResult"],"QueryPerson":[],"ClearResults":[],"UpdateQuery":["String"],"GetPerson":["Result.Result Http.Error (Maybe.Maybe Main.Person)"],"Translate":["Main.Language"],"SelectResult":["Main.Person"]},"args":[]},"Main.Language":{"tags":{"English":[],"Wookiee":[]},"args":[]},"Dict.NColor":{"tags":{"Black":[],"BBlack":[],"Red":[],"NBlack":[]},"args":[]},"Result.Result":{"tags":{"Err":["error"],"Ok":["value"]},"args":["error","value"]},"Http.Error":{"tags":{"Timeout":[],"BadStatus":["Http.Response String"],"BadPayload":["String","Http.Response String"],"BadUrl":["String"],"NetworkError":[]},"args":[]},"Dict.LeafColor":{"tags":{"LBlack":[],"LBBlack":[]},"args":[]},"Maybe.Maybe":{"tags":{"Nothing":[],"Just":["a"]},"args":["a"]},"Dict.Dict":{"tags":{"RBNode_elm_builtin":["Dict.NColor","k","v","Dict.Dict k v","Dict.Dict k v"],"RBEmpty_elm_builtin":["Dict.LeafColor"]},"args":["k","v"]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

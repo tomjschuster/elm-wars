@@ -74,34 +74,36 @@ type Msg
     | SelectResult Person
     | GetPerson (Result Http.Error (Maybe Person))
     | Translate Language
+    | ClearResults
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ClearResults ->
+            { model
+                | person = Nothing
+                , queryResult = emptyQueryResult ""
+            }
+                ! []
+
         UpdateQuery query ->
             { model | query = query } ! []
 
         QueryPerson ->
-            let
-                cmd =
-                    if model.query == "" then
-                        Cmd.none
-                    else
-                        queryByName model.query
-            in
-                ( { model | person = Nothing }, cmd )
-
-        GetResults (Ok queryResult) ->
-            ( { model | queryResult = queryResult }, Cmd.none )
-
-        GetResults (Err _) ->
             ( { model
-                | person = Nothing
+                | query = ""
+                , person = Nothing
                 , queryResult = emptyQueryResult model.query
               }
-            , Cmd.none
+            , queryByName model.query
             )
+
+        GetResults (Ok queryResult) ->
+            ( { model | queryResult = { queryResult | queryString = model.queryResult.queryString } }, Cmd.none )
+
+        GetResults (Err _) ->
+            ( { model | person = Nothing }, Cmd.none )
 
         SelectResult person ->
             ( model, getPerson model.language person )
@@ -188,7 +190,6 @@ getQueryResults : String -> Cmd Msg
 getQueryResults url =
     Http.get url (queryResultDecoder English)
         |> Http.toTask
-        |> Task.map (\results -> { results | queryString = "" })
         |> Task.attempt GetResults
 
 
@@ -353,6 +354,14 @@ planetText maybePlanet =
             ""
 
 
+query : String -> Msg
+query queryString =
+    if queryString == "" then
+        ClearResults
+    else
+        QueryPerson
+
+
 view : Model -> Html Msg
 view model =
     div
@@ -367,7 +376,7 @@ view model =
                     [ type_ "text", onInput UpdateQuery, value model.query ]
                     []
                 , button
-                    [ class "ui button", onClick QueryPerson ]
+                    [ class "ui button", query model.query |> onClick ]
                     [ text "Query" ]
                 , translateButton model.person model.language
                 ]
